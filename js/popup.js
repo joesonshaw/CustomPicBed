@@ -1,12 +1,61 @@
-var global_pid = "";
-var storageData = localStorage.weiboData ? JSON.parse(localStorage.weiboData) : [];
-var https = localStorage.is_https ? JSON.parse(localStorage.is_https) : $("#https").is(':checked');
+var storageData = localStorage.imageData ? JSON.parse(localStorage.imageData) : [];
+var bedList = localStorage.bedlist ? JSON.parse(localStorage.bedlist) : [];
 var version_info = localStorage.version_info ? JSON.parse(localStorage.version_info) : false;
-var default_domain_prefix = "tva";
-var default_domain_prefixs = "wx";
-var http_pre  = "http://";
-var https_pre = "https://";
 
+function packMsgReq(type, data) {
+	return {
+		uuid: function () {
+			return 'generate-uuid-4you-seem-professional'.replace(
+				/[genratuidyosmpfl]/g, function (c) {
+					const r = Math.random() * 16 | 0,
+						v = c === 'x' ? r : (r & 0x3 | 0x8);
+					return v.toString(16);
+				});
+		}(),
+		type: type,
+		data: data,
+		timestamp: Date.now()
+	};
+}
+ 
+const http = {
+	request: function (options) {
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage(packMsgReq('FetchRequest', options),
+				(response) => {
+					if (response.state) {
+						resolve(response.data);
+					} else {
+						reject(response.data);
+					}
+				});
+		});
+	},
+	get: function (options) {
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage(packMsgReq('FetchGet', options),
+				(response) => {
+					if (response.state) {
+						resolve(response.data);
+					} else {
+						reject(response.data);
+					}
+				});
+		});
+	},
+	post: function (options) {
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage(packMsgReq('FetchPost', options),
+				(response) => {
+					if (response.state) {
+						resolve(response.data);
+					} else {
+						reject(response.data);
+					}
+				});
+		});
+	}
+};
 
 var Wbpd = Wbpd || {};
 Wbpd.prototype={
@@ -18,16 +67,12 @@ Wbpd.prototype={
         $("#optionPage").click(function(event) {
             event.preventDefault();
             chrome.tabs.create({url:'option.html'});
-            window.close();
+            // window.close();
         });
         //批量模式按钮
         // 批量模式,0关闭,1开启
         $(".btn-batch").on("click",function () {
             Wbpd.prototype.toggleBatch();
-        });
-        $('#https').attr('checked',https);//记住上次的设定
-        $("#https").on("click",function () {
-            localStorage.is_https=$("#https").is(':checked');
         });
 
         //version_info
@@ -86,22 +131,6 @@ Wbpd.prototype={
             $(this).parent().removeAttr('data-tooltip');
         }).on('mouseleave', '.batch-url', function() {
             $(this).blur();
-        });
-        //修改图片尺寸和返回内容格式,绑定同一个事件
-        $(".btn-size,.btn-format").on("click", function() {
-            $(this).parent().children().removeClass('active');
-            $(this).addClass('active');
-            if (global_pid != "") {
-                if (Wbpd.prototype.is_batch > 0) { //如果是批量模式,此处循环执行
-                    var img_length = $('.batch-model img').length;
-                    for (var i = 0; i < img_length; i++) {
-                        Wbpd.prototype.changePicFormat($('#res' + i).data('params'), i);
-                    }
-
-                } else {
-                    Wbpd.prototype.changePicFormat($('#res_img').data('params'));
-                }
-            }
         });
         //批量模式下,点击叉叉删除事件
         $(".batch-model").on('click', '.fancybox-close', function() {
@@ -231,34 +260,6 @@ Wbpd.prototype={
         $('#uploadPlaceHolder').prop('src', '1x1.png');
         $('.clicker').css('border', 'none').css('background-color', 'transparent').css('box-shadow','none');
     },
-    //检查微博登录状态
-    checkWeiboStatus: function() {
-        $("body").addClass("app-loading");
-        $.ajax({
-            url: "https://weibo.com/aj/onoff/getstatus",
-            cache: false,
-            success: function(result){
-                setTimeout(function() { 
-                    $("div.loading-bar").remove();
-                }, 2000);
-                if (result && result.code == '100000') {
-                    $('#statusBadge').addClass('badge-success');
-                } else {
-                    $('#statusBadge').removeClass('badge-success');
-                    chrome.notifications.create({
-                        type: "basic",
-                        iconUrl: "icon.png",
-                        title: "提示",
-                        message: "微博账户未登录...",
-                        requireInteraction: true,
-                    });
-                }
-            },
-            error : function(){
-                $("div.loading-bar").remove();
-            }
-        });
-    },
     //切换批量模式
     toggleBatch: function(flag) {
         if (arguments.length > 0 && !isNaN(flag)) {
@@ -285,47 +286,7 @@ Wbpd.prototype={
             $('.batch-model').hide();
         }
     },
-    //pid计算url
-    pid2url: function(params, type) {
-        function crc32(str) {
-            str = String(str);
-            var table = '00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F 63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC 51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E 7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D 806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA 11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F 30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D';
-            if (typeof(crc) == 'undefined') {
-                crc = 0;
-            }
-            var x = 0,
-                y = 0;
-            crc = crc ^ (-1);
-            for (var i = 0, iTop = str.length; i < iTop; i++) {
-                y = (crc ^ str.charCodeAt(i)) & 0xFF;
-                x = '0x' + table.substr(y * 9, 8);
-                crc = (crc >>> 8) ^ x;
-            }
-            return crc ^ (-1);
-        }
-
-        var url, zone;
-        var url_pre = $("#https").is(':checked') ? https_pre : http_pre;
-        if (localStorage.domain) {
-            url_pre = url_pre + localStorage.domain;
-        } else {
-            url_pre = url_pre + default_domain_prefix;
-        }
-        if (typeof(type) == 'undefined') type = 'bmiddle';
-        if (params.pid[9] == 'w') {
-            zone = (crc32(params.pid) & 3) + 1;
-            url = url_pre + zone + '.sinaimg.cn/' + type + '/' + params.pid;
-        } else {
-            zone = ((params.pid.substr(-2, 2), 16) & 0xf) + 1;
-            url = url_pre + zone + '.sinaimg.cn/' + type + '/' + params.pid;
-        }
-        console.log("params.ext : " + params.ext);
-        console.log("url : " + url);
-        return url + params.ext;
-    },
-    changePicFormat: function(params, i) {
-        var picSizeType = $(".btn-group").children(".active").prop("value"); //获取图片大小
-        var callBackImg = Wbpd.prototype.pid2url(params, picSizeType);
+    changePicFormat: function(params, callBackImg, i) {
         if (Wbpd.prototype.is_batch > 0 && arguments.length > 1) { //批量模式
             $('#res' + i).data('url', callBackImg); //批量模式,数据存到下面的地址框中
             var url_format = parseInt($(".btn-format").parent().children(".active").prop("value"));
@@ -380,7 +341,7 @@ Wbpd.prototype={
                 imgsrc: image
             });
         }
-        localStorage.weiboData = JSON.stringify(storageData);
+        localStorage.imageData = JSON.stringify(storageData);
     },
     //批量上传图片时,绘制结果区
     batchDisplay: function(n) {
@@ -442,9 +403,21 @@ Wbpd.prototype={
     //预览和上传
     previewAndUpload: function(file, i) {
         Wbpd.prototype.uploadFinishEvent();
+        const bedId = $('#bed-select').val()
+        if (!bedId) {
+            chrome.notifications.create({
+                type: "basic",
+                iconUrl: "icon.png",
+                title: "提示",
+                message: "请先添加自定义图床配置...",
+                requireInteraction: true,
+            });
+            return chrome.tabs.create({url:'option.html'})
+        }
+        const bedInfo = bedList.find(item=>item.id==bedId)
+        localStorage.lastUpload = bedId
         $(".loader-wrap").show();
         var reader = new FileReader();
-        var imgFile;
         reader.readAsDataURL(file);
         reader.onload = function(e) {
             if (Wbpd.prototype.is_batch != 1) {
@@ -464,70 +437,70 @@ Wbpd.prototype={
                 $('#pic' + i).css('background-position', 'center');
             }
         };
+        
+        const {customBody, customHeader, jsonPath, name, paramName, preHost, url} = bedInfo
+        let customBodyObj = {}, customHeaderObj = {}
+        try {customBodyObj = JSON.parse(customBody)} catch (e) {}
+        try {customHeaderObj = JSON.parse(customHeader)} catch (e) {}
+
         reader.onloadend = function(e) {
             $(".loader-wrap").fadeOut("fast");
-            imgFile = e.target;
-            var acceptType = imgFile.result.split(';')[0].toLowerCase();
-            var base64 = imgFile.result.split(',')[1];
+            const blob = dataURLtoBlob(e.target.result)
             var xhr = new XMLHttpRequest();
             xhr.upload.addEventListener("progress", function() { Wbpd.prototype.updateProgress(event, i) });
             Wbpd.prototype.xhr_arr.push(xhr); //保存xhr对象
             Wbpd.prototype.pic_num++; //计数
             var data = new FormData();
-            data.append('b64_data', base64);
+            // 设置自定义body
+            for (const key in customBodyObj) {
+                if (customBodyObj.hasOwnProperty.call(customBodyObj, key)) {
+                    const element = customBodyObj[key];
+                    data.append([key], element);
+                }
+            }
+            data.append([paramName], blob);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         var resText = xhr.responseText;
-                        var splitIndex, rs, pid, params;
+                        let params;
                         try {
-                            splitIndex = resText.indexOf('{"');
-                            rs = JSON.parse(resText.substring(splitIndex));
-                            pid = rs.data.pics.pic_1.pid;
-							ret = rs.data.pics.pic_1.ret;
-							if(ret == 1){
-								//获取成功
-								global_pid = pid;
-								params = {
-									pid: pid,
-									ext: acceptType == 'data:image/gif' ? '.gif' : '.jpg',
-									pic_name: file.name
-								};
-								image_url = Wbpd.prototype.changePicFormat(params, i);
-								Wbpd.prototype.saveUrlToLocal(params, image_url, i);
-								if (--Wbpd.prototype.pic_num == 0) { //如果图片数递减至0,说明所有图片上传完成
-									Wbpd.prototype.toggleBtn(1);
-								}
-								$('#pic' + i).nextAll('.progress').hide();
-								$('#pic' + i).nextAll('.input-append').show();
-								return true;								
-							}	
-							if(ret == -1){
-								//未登陆???
-								Wbpd.prototype.uploadFinishEvent();
-								chrome.notifications.create({
-									type: "basic",
-									iconUrl: "icon.png",
-									title: "提示",
-									message: "微博账户未登录...",
-									requireInteraction: false,
-								});
-								chrome.tabs.create({url : 'http://weibo.com/?topnav=1&mod=logo'});
-								setTimeout(
-									function() {
-										window.close();
-									}, 
-								3000);								
-							} else if(ret == -11){
-								//格式错误 比如ico 微博不支持 png 只能用gif->
-								swal("格式错误...");
-								return;
-							} else{
-								//其他错误
-								swal("其他错误...,错误编码为:"+ret + "请联系作者进行添加");
-								return;
-							}
-
+                            const body = JSON.parse(resText);
+                            if (body) {
+                                try {
+                                    let imgUrl = body, image_url = ''
+                                    for (let field of jsonPath.split('.')) {
+                                        imgUrl = imgUrl[field]
+                                    }
+                                    //获取成功
+                                    params = {
+                                        pid: new Date().getTime(),
+                                        ext: '.'+getFileExtension(file.name),
+                                        pic_name: file.name
+                                    };
+                                    image_url = preHost+imgUrl
+                                    Wbpd.prototype.changePicFormat(params, image_url, i);
+                                    Wbpd.prototype.saveUrlToLocal(params, image_url, i);
+                                    if (--Wbpd.prototype.pic_num == 0) { //如果图片数递减至0,说明所有图片上传完成
+                                        Wbpd.prototype.toggleBtn(1);
+                                    }
+                                    $('#pic' + i).nextAll('.progress').hide();
+                                    $('#pic' + i).nextAll('.input-append').show();
+                                    return true;	
+                                } catch (e) {
+                                    Wbpd.prototype.uploadFinishEvent();
+                                    if (--Wbpd.prototype.pic_num == 0) { //如果图片数递减至0,说明所有图片上传完成
+                                        Wbpd.prototype.toggleBtn(1);
+                                    }
+                                    chrome.notifications.create({
+                                        type: "basic",
+                                        iconUrl: "icon.png",
+                                        title: "未提取到图片链接",
+                                        message: "请检查自定义配置，接口返回信息:"+resText,
+                                        requireInteraction: false,
+                                    });
+                                }
+                            }
                         } catch (e) {
                             return;
                         }
@@ -536,9 +509,16 @@ Wbpd.prototype={
                     }
                 }
             };
-            xhr.open('POST', 'https://picupload.weibo.com/interface/pic_upload.php?ori=1&mime=image%2Fjpeg&data=base64&url=0&markpos=1&logo=&nick=0&marks=1&app=miniblog');
+            xhr.open('POST', url);
+            // 设置自定义header
+            for (const key in customHeaderObj) {
+                if (customHeaderObj.hasOwnProperty.call(customHeaderObj, key)) {
+                    const element = customHeaderObj[key];
+                    xhr.setRequestHeader([key], element)
+                }
+            }
             xhr.send(data);
-        };
+        }
     },
     updateProgress: function(evt, i) {
         $('#single-progress').css('display', 'block');
@@ -562,10 +542,9 @@ Wbpd.prototype={
         //清空图片的style
         $('.clicker').removeAttr('style');
         Wbpd.prototype.xhr_arr = []; //清空xhr的值
-        global_pid = '';
 
         //清空批量模式中的数据
-        $('.batch-model').html('<div><img src="placeholder2.png" class="dragger clicker"></div>');
+        $('.batch-model').html('<div style="max-width:220px;"><img src="placeholder2.png" class="dragger clicker"></div>');
 
         //清空单图模式下的数据
         $('.single-model[class^=col-xs-4] img').prop('src', 'placeholder.png');
@@ -616,9 +595,45 @@ $(function() {
     my = Wbpd.prototype;
     my.init();
     setTimeout(function() { 
-        my.checkWeiboStatus();
-    }, 800);
-    setTimeout(function() { 
         $("#versionDIV").slideUp();
     }, 6000);
+    renderBedSelector()
 });
+
+// 渲染下拉菜单
+function renderBedSelector () {
+    const lastUpload = localStorage.lastUpload || bedList[0]?.id
+    let html = ''
+    bedList.forEach(item => {
+        html+= `<option value="${item.id}">${item.name}</option>`
+    });
+    $('#bed-select').html(html)
+    $('#bed-select').val(lastUpload)
+}
+// 获取文件类型
+function getFileExtension(filename) {
+    var dotIndex = filename.lastIndexOf('.');
+    
+    if (dotIndex === -1 || dotIndex === 0 || dotIndex === filename.length - 1) {
+      return ""; // 如果没有找到点号，或者点号在首尾位置，则返回空字符串
+    }
+    
+
+    var extension = filename.substring(dotIndex + 1).toLowerCase();
+    return extension;
+}
+
+// base64转Blob
+const dataURLtoBlob = (dataUrl) => {
+	let arr = dataUrl.split(','),
+	mime = arr[0].match(/:(.*?);/)[1],
+	bstr = atob(arr[1]),
+	n = bstr.length,
+	u8arr = new Uint8Array(n)
+	while (n--) {
+		u8arr[n] = bstr.charCodeAt(n)
+	}
+	return new Blob([u8arr], {
+		type: mime,
+	})
+}	

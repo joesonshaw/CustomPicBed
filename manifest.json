@@ -1,26 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "新浪微博图床",
-  "short_name": "新浪微博图床",
-  "description": "简单好用的新浪微博图床,支持选择/拖拽/粘贴上传图片,并生成图片地址,HTML,UBB和Markdown等格式,支持浏览和删除历史记录",
-  "version": "2.9.6",
+  "name": "自定义图床",
+  "short_name": "自定义图床",
+  "description": "简单好用的自定义图床,支持选择/拖拽/粘贴上传图片,并生成图片地址,HTML,UBB和Markdown等格式,支持浏览和删除历史记录",
+  "version": "0.0.1",
   "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+    "16": "icon_16.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
   },
-  "background": {
-    "service_worker": "background.js"
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
   },
   "action": {
     "default_icon": "icon_38.png"
   },
   "options_page": "option.html",
   "permissions": [
-    "notifications","tabs","clipboardWrite","clipboardRead"
+    "notifications","tabs","clipboardWrite","clipboardRead","webRequest","background"
   ],
   "host_permissions": [
-    "*://*.weibo.cn/*", "*://*.weibo.com/*", "*://*.sina.com/*", "*://*.sina.com.cn/*", "*://*.sina.cn/*"
+    "<all_urls>"
   ],
   "content_security_policy": {
     "content_security_policy": "script-src 'self' object-src 'self'"

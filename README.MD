@@ -1,130 +1,7 @@
-<a href="https://chrome.google.com/webstore/detail/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E5%9B%BE%E5%BA%8A/fdfdnfpdplfbbnemmmoklbfjbhecpnhf/reviews" target="_blank">
-	<img width="300px" src="https://wx1.sinaimg.cn/large/5fd37818jw1eq7bx4bc4ej20c0038mx9.jpg">
-</a>
-
-<img width="650px" src="https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/screenshot/webstore.jpg">
-
-#### 微信小程序版
-<img width="200px" src="https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/screenshot/wechatmini.png">
-<a href="https://github.com/suxiaogang/WeiboPicBed/blob/master/README-COOKIE.MD">小程序版使用方法</a>
-
-## 💰捐助
-<img width="240px" src="https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/img/wechat.png"><img width="80px" src="https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/1x1.png"><img width="240px" src="https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/img/alipay.jpg">
-
-## 🚀 features
-- 支持点选/拖拽/本地粘贴3种方式上传图片至新浪微博图床
-- 支持批量上传
-- 可选择返回的图片尺寸
-- 可生成图片链接,HTML,UBB和Markdown四种格式
-- 上传历史浏览和删除.
-- 支持在常用在线markdown编辑器中使用ctrl+v粘贴图片，图片自动上传到微博图床。(目前已支持github，csdn及zybuluo的markdown在线编辑器)
-- 支持返回https安全协议的图片地址
-- 支持自定义Chrome菜单栏图标
-
-## 🖼 screenshots
-![](https://raw.githubusercontent.com/suxiaogang/WeiboPicBed/master/screenshot/screen.gif)
-
-![](https://upload-images.jianshu.io/upload_images/3203841-ecf76e0396a53b3b.gif) 
-
-(图片来自https://github.com/zhaoolee/ChromeAppHeroes)
-
-![](http://ww1.sinaimg.cn/large/5fd37818gw1eqps6zuxslj20xc0p0q9q.jpg)
-
-![](http://ww2.sinaimg.cn/large/5fd37818gw1eqhxjffq1tj20zk0m8wj6.jpg)
-
 ## 📑 更新日志
-```
-2021-10-11 v2.9.4 
-修复切换图片尺寸和批量模式时多次添加域名前缀的bug
-
-2021-09-25 v2.9.3
-尝试更为稳定的微博登录检测
-自定义上传域名前缀
-
-2021-09-16 v2.9.1
-更新至manifest_version 3
-
-2020-04-23 v2.9
-上传成功后自动复制原图链接至粘贴板
-
-2020-03-22 v2.8
-修复新浪域名解析
-增加(优化)全局从粘贴板上传的功能
-
-2019-09-01 v2.7
-修复上传错误的问题
-
-2019-01-16 v2.6
-更改部分样式,增加badge显示微博登录状态
-(尝试修复部分浏览器总是提示微博未登录)
-
-2017-03-16 v2.5
-支持大图和原图上传,修复上传图片url中图片后缀丢失的问题
-
-2017-02-03 v2.3
-修复上传图片错误的问题
-
-2016-07-07 v2.1
-支持批量上传 (代码由@Jackroyal贡献)
-
-2016-06-28 v2.0
-支持自定义Chrome菜单栏图标 (建议使用尺寸接近或者等于38*38的正方形png图片文件)
-支持返回https安全协议的图片地址
-
-2016-04-18 v1.9
-支持在常用Markdown在线编辑器中，使用Ctrl+V进行图片粘贴，目前已支持github, csdn及作业部落的在线markdown编辑器
-其中csdn的markdown在线编辑器需要使用两次ctrl+v完成粘贴 (代码由@liyumeng贡献)
-
-2015-09-13 v1.8
-支持生成UBB格式的图片外链
-
-2015-09-06 v1.7
-增加了复制按钮，其他一些细微调整
-
-2015-08-18 v1.6
-设置里面,在图片上点击右键可以删除该条历史记录
-
-2015-04-01 v1.5
-增加一个上传时的Loading效果(针对网络延迟和大文件上传)
-增加按下"Esc"键后关闭窗口
-
-2015-03-23 v1.4
-状态栏图标可以在选项里设置为灰色了
-
-2015-03-22 v1.3
-可以保存上传历史了
-
-2015-02-16 v1.2
-由browser action修改为popup
-
-2015-02-15 v1.0
-第一个版本发布
-
-```
-
-## ✍️ 常用在线markdown编辑器中使用ctrl+v粘贴图片
-[在github中的使用效果](http://ww3.sinaimg.cn/large/99b8535cjw1f306jse5g7j215n0jj444.jpg)
-
-[在csdn中的使用效果](http://ww2.sinaimg.cn/large/99b8535cjw1f306jftd8vj21gj0l646l.jpg)
-
-[在作业部落中的使用效果](http://ww4.sinaimg.cn/large/99b8535cjw1f306kv4yljj21gu0oz7cl.jpg)
-
-
-## 👬 contributors
-[@liyumeng](https://github.com/liyumeng)
-
-[@Jackroyal](https://github.com/Jackroyal)
-
-[Aqours](https://github.com/Aqours)
-
-[zjuchenyuan](https://github.com/zjuchenyuan)
-
-[pzx521521](https://github.com/pzx521521)
-
-## ❓ 最常被问到的问题
-> Q:我上传的图片去哪了?
->
-> A:图片上传调用了新浪微博这个接口 http://picupload.service.weibo.com/interface (该地址不一定可以直接访问), 然而上传的图片并不会保存到任何一个你的微博相册里(即使你已经登陆了微博),在插件的设置页面,你可以看到本机上传的图片历史记录(目前还不支持多设备同步)
+> 2024-05-28 v0.0.1   
+基于[WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)和[picgo-plugin-web-uploader](https://github.com/yuki-xin/picgo-plugin-web-uploader)实现[picgo](https://github.com/Molunerfinn/PicGo)的[web-uploader](https://github.com/yuki-xin/picgo-plugin-web-uploader)插件的基本功能，添加自定义网址前缀，以适应不返回完整链接的部分图床，如[Telegraph-Image](https://github.com/cf-pages/Telegraph-Image)。  
+> 支持配置多图床自由切换。
 
 ## 🔗 参考
 [Drag and drop](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop)
@@ -134,6 +11,12 @@
 [FileReader](https://developer.mozilla.org/en/docs/Web/API/FileReader)
 
 [localStorage](https://developer.mozilla.org/en/docs/Web/API/Window/localStorage)
+
+[WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)
+
+[picgo-plugin-web-uploader](https://github.com/yuki-xin/picgo-plugin-web-uploader)
+
+[Telegraph-Image](https://github.com/cf-pages/Telegraph-Image)
 
 ## 💎 Licence
 

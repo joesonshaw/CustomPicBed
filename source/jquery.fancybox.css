@@ -46,6 +46,7 @@
 
 .fancybox-outer, .fancybox-inner {
 	position: relative;
+	margin: 0 auto;
 }
 
 .fancybox-inner {

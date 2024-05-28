@@ -1,7 +1,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>新浪微博图床</title>
+<title>自定义图床</title>
 <meta http-equiv="content-type" content="text/html;charset=utf-8">
 <link rel="shortcut icon" href="icon.png" type="image/x-icon">
 <link type="text/css" href="css/bootstrap.min.css" rel="stylesheet">
@@ -131,7 +131,7 @@ h5 {
 .beta{
     margin-top: 40px;
 }
-#beta{
+#beta, #diy{
     float: right;
     font-size: 21px;
     font-weight: 700;
@@ -141,11 +141,11 @@ h5 {
     opacity: .2;
     /* box-shadow: 1px 1px 3px rgb(100 100 100 / 15%); */
 }
-#beta, #btn-close{
+#beta, #btn-close, #diy{
     transition: all 0.1s;
     -webkit-transition: all 0.1s
 }
-#beta:hover, #btn-close:hover{
+#beta:hover, #btn-close:hover, #diy:hover{
     color: #333 !important;
     opacity: 1 !important;
 }
@@ -522,9 +522,9 @@ img.zoom-img:hover {
 
 <body>
     <!-- modal -->
-    <div class="modal-overlay">
-        <div class="modal">
-            <a class="close-modal">
+    <div class="modal-overlay" id="beta-modal-overlay">
+        <div class="modal" id="beta-modal">
+            <a class="close-modal" id="beta-close-modal">
 			<svg viewBox="0 0 20 20">
 			  <path fill="#000000" d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z"></path>
 			</svg>
@@ -532,23 +532,25 @@ img.zoom-img:hover {
             <!-- close modal -->
             <div class="modal-content">
                 <div class="col-xs-12 beta">
-                    <p>1. 部分图片无法打开或解析的解决办法: https://github.com/suxiaogang/WeiboPicBed/issues/153</p>             
-                    <div class="code">原先微博图床上的图片链接地址前缀是 wx1-4 形式：
-wx1.sinaimg.cn、wx2.sinaimg.cn、wx3.sinaimg.cn、wx4.sinaimg.cn
-将其替换为 tva1-4 或 tvax1-4 的形式后，https的图片外链恢复可用。
-tva1.sinaimg.com、 tva2.sinaimg.com、 tva3.sinaimg.com、 tva4.sinaimg.com
-tvax1.sinaimg.com、tvax2.sinaimg.com、tvax3.sinaimg.com、tvax4.sinaimg.com
-注：只需将地址前缀中 wx 替换为 tva 或 tvax 即可，至于其中的数字无需对应，图片也能打开，当然保险起见，对应修改是最好的。</div>
+                    <p>1. 自定义请求头中请勿设置"Origin"，否则可能会报错Refused to set unsafe header "Origin"，虽然可能并不影响正常的上传功能</p>             
+                    <div class="code">图床配置：
+- 图床配置名: 图床备注，下拉选择中显示名称
+- API地址: 图床上传API地址
+- POST参数名: POST请求的参数名
+- JSON路径: 图片URL所在返回值的JsonPath(eg:data.url)
+- 自定义请求头: 自定义请求头 标准JSON(eg: {"key":"value"}
+- 自定义Body: 自定义Body 标准JSON(eg: {"key":"value"})
+- 自定义前缀: 自定义图片前缀 域名IP等(eg: https://img.eg.com)</div>
                     <p id="sort-reverse">2. 点击切换图片排序<span id='sort'></span></p>
-                    <p id="domain-setting">3. 设置上传域名前缀
+                    <!-- <p id="domain-setting">3. 设置上传域名前缀
                         <select class="form-control" id="domain-prefix" style="display:inline;width:80px;height:32px;margin-left:10px;">
                             <option value="wx">wx</option>
                             <option value="wx2">wx2</option>
                             <option value="tva">tva</option>
                             <option value="tvax">tvax</option>
                         </select>
-                    </p>
-                    <p id="chrome-sync">4. 数据同步[开发中]</p>
+                    </p> -->
+                    <p id="chrome-sync">3. 数据同步[开发中]</p>
                 </div>
                 <p style="position:absolute;bottom:0px;color:#c5c5c5;right:20px;font-size:12px;">https://developer.chrome.com/docs/extensions</p>
             </div>
@@ -559,18 +561,21 @@ tvax1.sinaimg.com、tvax2.sinaimg.com、tvax3.sinaimg.com、tvax4.sinaimg.com
     
     <button type="button" id="btn-close" class="close" title="关闭" style="margin:20px;">关闭</button>
     <button type="button" id="beta" title="关闭" style="margin:14px;">试验功能</button>
+    <button type="button" id="diy" title="自定义" style="margin:14px;">自定义</button>
 
     <div class="container">
         <div class="row">
             <div id="tips_wrap">
                 <div class="col-xs-12 tips">
                     <ul>
-                        <li>当前版本:<span class="current_version">${current_version})</span>, <a href="https://github.com/suxiaogang/WeiboPicBed#-%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97" target="_blank">查看更新记录</a></li>
-                        <li>喜欢这个扩展程序?
-                            <a href="https://chrome.google.com/webstore/detail/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E5%9B%BE%E5%BA%8A/fdfdnfpdplfbbnemmmoklbfjbhecpnhf/reviews" target="_blank">欢迎去 Chrome 应用商店来一发五星好评！</a></li>
-                        <li>使用中碰到任何问题，<a href="https://github.com/suxiaogang/WeiboPicBed/issues/new?template=bug_report.md" target="_blank">请在这里提交反馈</a><span style="color:#7d7d7d;"><span></li>
-                        <li>本扩展程序是托管于Github的开源项目，欢迎<a href="https://github.com/suxiaogang/WeiboPicBed" target="_blank">贡献想法和代码</a></li>
-                        <li><span class="donate">捐助开发者</span>以便我做的更好</li>
+                        <li>当前版本:<span class="current_version">${current_version})</span>, <a href="https://github.com/joesonshaw/CustomPicBed#-%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97" target="_blank">查看更新记录</a></li>
+                        <!-- <li>喜欢这个扩展程序?
+                            <a href="https://chrome.google.com/webstore/detail/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E5%9B%BE%E5%BA%8A/fdfdnfpdplfbbnemmmoklbfjbhecpnhf/reviews" target="_blank">欢迎去 Chrome 应用商店来一发五星好评！</a></li> -->
+                        <li>使用中碰到任何问题，<a href="https://github.com/joesonshaw/CustomPicBed/issues/new?template=bug_report.md" target="_blank">请在这里提交反馈</a><span style="color:#7d7d7d;"><span></li>
+                        <li>本扩展程序是托管于Github的开源项目，欢迎<a href="https://github.com/joesonshaw/CustomPicBed" target="_blank">贡献想法和代码</a></li>
+                        <li>基于<a href="https://github.com/suxiaogang/WeiboPicBed" target="_blank">WeiboPicBed</a>项目修改调整而来</li>
+                        <li>感谢<a href="https://github.com/yuki-xin/picgo-plugin-web-uploader" target="_blank">picgo-plugin-web-uploader</a>项目提供的灵感</li>
+                        <!-- <li><span class="donate">捐助开发者</span>以便我做的更好</li> -->
                     </ul>
                     <hr>
                     <div class="checkbox css3Label" style="padding-left:15px;">
@@ -590,6 +595,63 @@ tvax1.sinaimg.com、tvax2.sinaimg.com、tvax3.sinaimg.com、tvax4.sinaimg.com
             <div class="box"></div>
         </div>
     </div>
+    
+    <!-- modal -->
+    <div class="modal-overlay" id="diy-modal-overlay">
+        <div class="modal" id="diy-modal">
+            <a class="close-modal" id="diy-close-modal">
+			<svg viewBox="0 0 20 20">
+			  <path fill="#000000" d="M15.898,4.045c-0.271-0.272-0.713-0.272-0.986,0l-4.71,4.711L5.493,4.045c-0.272-0.272-0.714-0.272-0.986,0s-0.272,0.714,0,0.986l4.709,4.711l-4.71,4.711c-0.272,0.271-0.272,0.713,0,0.986c0.136,0.136,0.314,0.203,0.492,0.203c0.179,0,0.357-0.067,0.493-0.203l4.711-4.711l4.71,4.711c0.137,0.136,0.314,0.203,0.494,0.203c0.178,0,0.355-0.067,0.492-0.203c0.273-0.273,0.273-0.715,0-0.986l-4.711-4.711l4.711-4.711C16.172,4.759,16.172,4.317,15.898,4.045z"></path>
+			</svg>
+		  </a>
+            <!-- close modal -->
+            <div class="modal-content">
+                <div class="col-xs-12 beta">
+                    <p id="bed-setting">选择图床
+                        <select class="form-control" id="bed-select" style="display:inline;width:auto;height:32px;margin-left:10px;">
+                        </select>
+                    </p>
+                    <form id="diy-form" class="form-horizontal" action="#">
+                    <div class="form-group col-xs-6">
+                        <label for="diy-name">图床配置名</label>
+                        <input type="input" id="diy-name" class="form-control" placeholder="图床配置名">
+                    </div>
+                    <div class="form-group col-xs-6" style="margin-left: 20px;">
+                        <label for="diy-url">API地址</label>
+                        <input type="input" id="diy-url" class="form-control" placeholder="API地址">
+                    </div>
+                    <div class="form-group col-xs-6">
+                        <label for="diy-paramName">POST参数名</label>
+                        <input type="input" id="diy-paramName" class="form-control" placeholder="POST参数名">
+                    </div>
+                    <div class="form-group col-xs-6" style="margin-left: 20px;">
+                        <label for="diy-jsonPath">JSON路径</label>
+                        <input type="input" id="diy-jsonPath" class="form-control" placeholder="图片URL JSON路径(eg: data.url)">
+                    </div>
+                    <div class="form-group col-xs-6">
+                        <label for="diy-customHeader">自定义请求头</label>
+                        <input type="input" id="diy-customHeader" class="form-control" placeholder='标准JSON(eg: {"key":"value"})'>
+                    </div>
+                    <div class="form-group col-xs-6" style="margin-left: 20px;">
+                        <label for="diy-customBody">自定义Body</label>
+                        <input type="input" id="diy-customBody" class="form-control" placeholder='标准JSON(eg: {"key":"value"})'>
+                    </div>
+                    <div class="form-group col-xs-6">
+                        <label for="diy-preHost">自定义前缀</label>
+                        <input type="input" id="diy-preHost" class="form-control" placeholder='域名IP等(eg: https://img.eg.com)'>
+                    </div>
+                    <br>
+                    <div class="col-xs-12" style="padding-left: 0;">
+                        <button type="submit" id="submit" class="btn btn-primary">保存</button>
+                        <button id="delete" class="btn btn-danger">删除</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <!-- content -->
+        </div>
+    </div>
+    <!-- overlay -->
     <script id="image-item-template" type="template">
         <div class="col-md-2 animated fadeInUp">
             <div class="page-header">{{date}}</div>

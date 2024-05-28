@@ -311,6 +311,8 @@ a#optionPage:hover {
 }
 
 .navbar-fixed-bottom {
+    display: flex;
+    align-items: center;
     background-color: rgba(232, 232, 232, 0.65);
 }
 
